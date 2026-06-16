@@ -10,7 +10,18 @@
 
 **Based on the Book**: [The Little Handbook of Natural Remedies by Michael Martin](https://play.google.com/store/books/details/Michael_Martin_The_Little_Handbook_of_Natural_Reme?id=_KRNEQAAQBAJ)
 
-An AI-powered herbal remedies chatbot and natural medicine research assistant featuring natural remedies from *The Little Handbook of Natural Remedies* by Michael Martin. This RAG (Retrieval-Augmented Generation) system provides evidence-based answers about herbal remedies, medicinal plants, traditional medicine, and botanical medicine through advanced AI technology.
+An AI-powered herbal remedies chatbot and natural medicine research assistant featuring natural remedies from *The Little Handbook of Natural Remedies* by Michael Martin. This RAG (Retrieval-Augmented Generation) system provides evidence-based answers about herbal remedies, medicinal plants, traditional medicine, and botanical medicine — powered by a self-hosted, swappable language model rather than a third-party chatbot API.
+
+## Self-Hosted LLM, Not a ChatGPT Wrapper
+
+Most "AI chatbot" projects call a hosted API like OpenAI's and stop there. This one runs its own language model end-to-end:
+
+- **Open-weight model**: [Mistral](https://mistral.ai) 7B by default, served locally via [Ollama](https://ollama.ai) — no OpenAI/Anthropic API key required for the core chatbot.
+- **Swappable by design**: any Ollama-compatible model can be dropped in via a single config value (e.g. a larger `mistral-nemo:12b` for higher quality, trading off speed and cost).
+- **Hand-built retrieval**: no LangChain or vector-database framework — a custom hybrid search blends embedding similarity with keyword scoring, with an adaptive cutoff that returns more or fewer chunks depending on how confident the match is.
+- **Self-managed inference infrastructure**: deployed on serverless GPU containers via [Modal](https://modal.com) (L4/T4), with custom memory-snapshotting that cuts cold starts from ~10-12s to ~2-3s.
+
+This adds real operational complexity (and GPU hosting costs that aren't necessarily cheaper than per-token API pricing) compared to calling a hosted LLM API — but it buys full control over model choice, response quality, and latency, with no dependency on a third party's pricing, rate limits, or data policies.
 
 ## Features
 
@@ -27,8 +38,9 @@ An AI-powered herbal remedies chatbot and natural medicine research assistant fe
 
 - **FastAPI** server with WebSocket support
 - **Sentence Transformers** for semantic embeddings of *The Little Handbook of Natural Remedies*
-- **LLM Integration** for context-aware response generation with source citations
-- **Vector Search** with numpy-based similarity matching on book content
+- **Self-Hosted LLM** — open-weight model (Mistral by default) served via Ollama, swappable for any Ollama-compatible model
+- **Hybrid Retrieval** — combines vector cosine similarity with custom keyword scoring and an adaptive top-k cutoff, hand-built without a RAG framework
+- **Serverless GPU Hosting** via Modal, with memory-snapshot cold-start optimization
 - **Document Processing Pipeline** for processing the handbook into vector embeddings
 - **Rate Limiting** and input validation
 
@@ -52,8 +64,8 @@ An AI-powered herbal remedies chatbot and natural medicine research assistant fe
 2. **Text Chunking**: Splits the handbook into meaningful chunks with configurable sizes
 3. **Embedding Generation**: Creates semantic vectors of book content using sentence transformers
 4. **Vector Storage**: Saves embeddings as numpy arrays for efficient retrieval
-5. **Query Processing**: Finds relevant book sections using cosine similarity
-6. **Response Generation**: Uses LLM to synthesize answers from retrieved book context, with citations
+5. **Query Processing**: Finds relevant book sections using a hybrid of cosine similarity and keyword scoring, with an adaptive cutoff
+6. **Response Generation**: Uses the self-hosted LLM (Mistral by default) to synthesize answers from retrieved book context, with citations
 7. **LLM Expansion**: Supplements book knowledge with LLM-based expansion for broader queries
 
 ### API Endpoints
