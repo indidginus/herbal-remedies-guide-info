@@ -70,8 +70,10 @@ This adds real operational complexity (and GPU hosting costs that aren't necessa
 
 ### API Endpoints
 
-- `POST /query` - Submit questions via REST API
+- `POST /ask` - Submit questions via REST API
 - `WebSocket /ws` - Real-time chat interface
+- `GET /health` - Health check
+- `GET /stats` - Service statistics
 - Rate limiting and input validation on all endpoints
 
 ## Performance Optimizations
