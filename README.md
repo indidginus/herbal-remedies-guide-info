@@ -16,10 +16,10 @@ An AI-powered herbal remedies chatbot and natural medicine research assistant fe
 
 Most "AI chatbot" projects call a hosted API like OpenAI's and stop there. This one runs its own language model end-to-end:
 
-- **Open-weight model**: [Mistral](https://mistral.ai) 7B by default, served locally via [Ollama](https://ollama.ai) — no OpenAI/Anthropic API key required for the core chatbot.
-- **Swappable by design**: any Ollama-compatible model can be dropped in via a single config value (e.g. a larger `mistral-nemo:12b` for higher quality, trading off speed and cost).
+- **Open-weight model**: [Mistral](https://mistral.ai) 7B (v0.3) by default, served locally via [Ollama](https://ollama.ai) for development and by [vLLM](https://docs.vllm.ai) (a 4-bit build) in production — no OpenAI/Anthropic API key required for the core chatbot.
+- **Swappable by design**: any Ollama-compatible model can be dropped in locally via a single config value (e.g. a larger `mistral-nemo:12b` for higher quality, trading off speed and cost).
 - **Hand-built retrieval**: no LangChain or vector-database framework — a custom hybrid search blends embedding similarity with keyword scoring, with an adaptive cutoff that returns more or fewer chunks depending on how confident the match is.
-- **Self-managed inference infrastructure**: deployed on serverless GPU containers via [Modal](https://modal.com) (L4/T4), with custom memory-snapshotting that cuts cold starts from ~10-12s to ~2-3s.
+- **Self-managed inference infrastructure**: deployed on serverless GPU containers via [Modal](https://modal.com) (A10), using GPU memory snapshots with vLLM's sleep mode: a cold start takes about 20 s (it was 95-140 s with the earlier Ollama-based deployment, which is kept as a fallback) and a warm answer about 3 s.
 
 This adds real operational complexity (and GPU hosting costs that aren't necessarily cheaper than per-token API pricing) compared to calling a hosted LLM API — but it buys full control over model choice, response quality, and latency, with no dependency on a third party's pricing, rate limits, or data policies.
 
@@ -38,9 +38,9 @@ This adds real operational complexity (and GPU hosting costs that aren't necessa
 
 - **FastAPI** server with WebSocket support
 - **Sentence Transformers** for semantic embeddings of *The Little Handbook of Natural Remedies*
-- **Self-Hosted LLM** — open-weight model (Mistral by default) served via Ollama, swappable for any Ollama-compatible model
+- **Self-Hosted LLM** — open-weight model (Mistral by default) served via vLLM in production and Ollama locally; the local model is swappable for any Ollama-compatible model
 - **Hybrid Retrieval** — combines vector cosine similarity with custom keyword scoring and an adaptive top-k cutoff, hand-built without a RAG framework
-- **Serverless GPU Hosting** via Modal, with memory-snapshot cold-start optimization
+- **Serverless GPU Hosting** via Modal, with GPU memory snapshots (about 20 s cold start)
 - **Document Processing Pipeline** for processing the handbook into vector embeddings
 - **Rate Limiting** and input validation
 
