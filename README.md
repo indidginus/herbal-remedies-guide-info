@@ -43,6 +43,7 @@ This adds real operational complexity (and GPU hosting costs that aren't necessa
 - **Serverless GPU Hosting** via Modal, with GPU memory snapshots (about 20 s cold start)
 - **Document Processing Pipeline** for processing the handbook into vector embeddings
 - **Rate Limiting** and input validation
+- **Cost guards** — gibberish and off-topic questions are refused in the browser before any GPU is woken, and questions reach the model only through a server-side access check with per-IP limits
 
 ### Frontend (React + TypeScript)
 
